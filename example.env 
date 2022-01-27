@@ -1,0 +1,12 @@
+PORT=3000
+BOT_TOKEN=token
+
+
+
+#db
+type=postgresql
+host=localhost
+user=name
+port=5454
+password=password
+database=db
