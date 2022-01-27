@@ -44,7 +44,7 @@ bot.command('d_nick', async ctx => {
     const nick: string = ctx.message.text.slice(8).trim()
     await updateUserActions(ctx)
     
-    logger.warn(`Tge user id - ${ctx.message.from.id}, login - ${ctx.from.username} sent request with name - ${nick}`)
+    logger.warn(`The user id - ${ctx.message.from.id}, login - ${ctx.from.username} sent request with name - ${nick}`)
 
     try {
         const page = await authToProfile()
