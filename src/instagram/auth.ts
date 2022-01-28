@@ -6,7 +6,7 @@ export async function authToProfile(email: string = null, password: string = nul
     const browserInstance = await startBrowser();
     const page = await browserInstance.newPage();
 
-    if (!page) throw new Error("Возникла проблема с созданием браузера");
+    if (!page) throw new Error("Browser failed");
 
     const authEmail = email ? email : process.env.def_mail
     const authPassword = email ? email : process.env.def_pass
@@ -30,9 +30,9 @@ export async function authToProfile(email: string = null, password: string = nul
     } catch (error) {
         const allerError = await page.waitForSelector('p[id=slfErrorAlert]', {timeout: 10000});
         if(allerError) {
-            throw new Error("Ошибка авторизации");
+            throw new Error("Auth Error");
         }else{
-            throw new Error("Другая ошибка");
+            throw new Error("Othre Error");
         }
     }
     return page

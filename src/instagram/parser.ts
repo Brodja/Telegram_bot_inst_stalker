@@ -2,10 +2,15 @@
 
 export async function goToProfile(page, profile_name) {
     await page.goto(`https://www.instagram.com/${profile_name}/`);
-    await page.waitFor(5000);
-    await openFollowing(page, profile_name)
-    await scrollList(page, `div.isgrP`, 11)
-    await getInfo(page)
+    const link = await page.$(`a[href*="/${profile_name}/following/"]`);
+    if (!link){
+         throw new Error("Profile not found");
+    } else {
+        return page
+    }
+    // await openFollowing(page, profile_name)
+    // await scrollList(page, `div.isgrP`, 11)
+    // await getInfo(page)
 }
 
 async function openFollowing(page, profile_name) {

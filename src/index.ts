@@ -4,14 +4,17 @@ import { createConnection } from "typeorm";
 import * as express from "express";
 import { Telegraf } from 'telegraf'
 import { checkUser, updateUserActions } from './services/UserService';
-import { getMainMenu, getBackBtn, setMailAndPass } from './keyboards/keyboards'
+import { getMainMenu, getBackBtn, setMailAndPass, getMainMenuInline, MenuActions } from './keyboards/keyboards'
 import { authToProfile } from './instagram/auth';
 import { goToProfile } from './instagram/parser';
 import { logger } from './services/Loger';
 import { CheckUserResultInterface } from './interface/check-user.inreface';
+import { getListFollowers } from './instagram/get_list_followers';
 
 const app = express();
 const bot = new Telegraf(process.env.BOT_TOKEN)
+let CURRENT_PAGE
+let NICK: string
 
 console.log(process.env.PORT)
 
@@ -25,46 +28,77 @@ bot.start(async ctx => {
 
     const checkUserResult: CheckUserResultInterface = await checkUser(ctx)
 
-    if(checkUserResult.creating){
-        ctx.replyWithHTML(`Hello, <b>${ctx.from.first_name}</b>!! \nYou can start testing the bot.`, getMainMenu())
+    if (checkUserResult.creating) {
+        ctx.replyWithHTML(`Hello, <b>${ctx.from.first_name}</b>!! \nYou can start testing the bot.`, getMainMenuInline())
     } else {
-        ctx.replyWithHTML(`Welcome, <b>${ctx.from.first_name}</b>!! \nYou can start testing the bot.`, getMainMenu())
+        ctx.replyWithHTML(`Welcome, <b>${ctx.from.first_name}</b>!! \nYou can start testing the bot.`, getMainMenuInline())
     }
 })
 
-bot.hears('Use default profile', ctx => {
-    logger.debug(`Touched to use default profile`);
-    ctx.reply(
-        `Enter a nickname with comand, exaple:
-        /d_nick exaplenick`, getBackBtn())
+bot.hears('To start', ctx => {
+    ctx.reply('9️⃣1️⃣1️⃣', getMainMenuInline())
 })
 
-bot.command('d_nick', async ctx => {
-    ctx.reply('Nick successfully processed. Expect result')
-    const nick: string = ctx.message.text.slice(8).trim()
+bot.command('nick', async ctx => {
+    ctx.reply('Ok, pls wait')
+    NICK = ctx.message.text.slice(6).trim()
     await updateUserActions(ctx)
-    
-    logger.warn(`The user id - ${ctx.message.from.id}, login - ${ctx.from.username} sent request with name - ${nick}`)
-
+    logger.warn(`The user id - ${ctx.message.from.id}, login - ${ctx.from.username} sent request with name - ${NICK}`)
     try {
-        const page = await authToProfile()
-        ctx.reply('Authorization was successful')
-        await goToProfile(page, nick)
+        CURRENT_PAGE = await authToProfile()
+        CURRENT_PAGE = await goToProfile(CURRENT_PAGE, NICK)
+        logger.debug(`Authorization was successful and Profile is true`);
+        ctx.reply('Authorization was successful and ${nick} exists', MenuActions())
     } catch (error) {
         logger.warn('Authorization failed', error)
         ctx.reply(`${error}`)
     }
 
-    logger.debug(`Success result sended`);
 })
 
 
 
 
 
-bot.hears('Back', ctx => {
-    ctx.reply('Go back', getMainMenu())
+
+
+bot.action('use_default_profile', ctx => {
+    ctx.answerCbQuery('Ok bitch!!')
+    ctx.reply(
+        `Enter a nickname with comand, exaple:
+        /nick exaplenick`, getBackBtn())
 })
+bot.action('authorize_account', ctx => {
+    ctx.answerCbQuery('Sorry, it will be.')
+    ctx.reply('1', getBackBtn())
+})
+
+bot.action('get_list_followers', async ctx => {
+    ctx.reply('Bot is finding data. Pls wait.⏳')
+
+    await getListFollowers(CURRENT_PAGE, NICK)
+
+    ctx.reply('Finish ⌛️', getBackBtn())
+})
+
+
+bot.action('get_list_following', async ctx => {
+    ctx.answerCbQuery('Sorry, it will be.')
+    ctx.reply('1', getBackBtn())
+})
+
+
+bot.action('get_last_post', async ctx => {
+    ctx.answerCbQuery('Sorry, it will be.')
+    ctx.reply('1', getBackBtn())
+})
+
+
+bot.action('get_list_posts', async ctx => {
+    ctx.answerCbQuery('Sorry, it will be.')
+    ctx.reply('1', getBackBtn())
+})
+
 
 bot.launch()
 
