@@ -48,7 +48,7 @@ bot.command('nick', async ctx => {
         CURRENT_PAGE = await authToProfile()
         CURRENT_PAGE = await goToProfile(CURRENT_PAGE, NICK)
         logger.debug(`Authorization was successful and Profile is true`);
-        ctx.reply('Authorization was successful and ${nick} exists', MenuActions())
+        ctx.reply(`Authorization was successful and ${NICK} exists`, MenuActions())
     } catch (error) {
         logger.warn('Authorization failed', error)
         ctx.reply(`${error}`)
@@ -74,11 +74,11 @@ bot.action('authorize_account', ctx => {
 })
 
 bot.action('get_list_followers', async ctx => {
-    ctx.reply('Bot is finding data. Pls wait.⏳')
+    ctx.answerCbQuery('Bot is finding data. Pls wait.⏳')
 
     await getListFollowers(CURRENT_PAGE, NICK)
 
-    ctx.reply('Finish ⌛️', getBackBtn())
+    // ctx.reply('Finish ⌛️', getBackBtn())
 })
 
 
